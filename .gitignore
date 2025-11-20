@@ -890,38 +890,8 @@
 # PROJECT SPECIFIC
 # ==============================================================================
 # Add your project-specific ignores here
-
-# WhatsApp session files
-whatsapp-session/
-session-*
-
-# Uploads directory
-uploads/
-public/uploads/
-
-# Database files
-*.db
-*.sqlite
-
-# SSL certificates
-*.pem
-*.key
-*.crt
-
-# Build outputs
-build/
-dist/
-
-# Runtime files
-*.log
-*.pid
-*.seed
-
-# Vercel
-.vercel
-
-# API Keys and secrets
-*secret*
-*key*
-*token*
+# workspace/
+# data/
+# uploads/
+# downloads/
 
