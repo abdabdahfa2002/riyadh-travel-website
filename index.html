@@ -12,6 +12,9 @@
     <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
     <style>
         :root {
             /* Color System */
@@ -1054,18 +1057,75 @@
             submitBtn.innerHTML = '<div class="loading"></div> جاري الإرسال...';
             submitBtn.disabled = true;
             
-            // Simulate form submission
-            setTimeout(() => {
-                alert('تم إرسال طلبك بنجاح! سنتصل بك في أقرب وقت ممكن.');
-                closeServiceModal();
-                
-                // Reset form
-                this.reset();
-                
+            // Submit form to backend API
+            try {
+                const formData = new FormData(this);
+                const bookingData = {
+                    customerInfo: {
+                        fullName: formData.get('fullName'),
+                        phoneNumber: formData.get('phone'),
+                        email: formData.get('email') || '',
+                        region: formData.get('region'),
+                        nationality: formData.get('nationality') || 'Saudi Arabia'
+                    },
+                    serviceDetails: {
+                        serviceType: formData.get('serviceType'),
+                        description: formData.get('description'),
+                        preferredDate: formData.get('preferredDate') || null,
+                        urgent: formData.get('urgent') === 'on'
+                    },
+                    customRequirements: formData.get('notes') || '',
+                    paymentInfo: {
+                        totalAmount: 0, // Will be calculated based on service
+                        currency: 'SAR',
+                        paymentMethod: 'pending'
+                    }
+                };
+
+                // Map service types to service IDs (you'll need to get these from your database)
+                const serviceMapping = {
+                    'documentation': 'documentation-service-id',
+                    'travel': 'travel-service-id',
+                    'labor': 'labor-service-id',
+                    'visa': 'visa-service-id',
+                    'government': 'government-service-id'
+                };
+
+                bookingData.serviceDetails.serviceId = serviceMapping[bookingData.serviceDetails.serviceType];
+
+                const response = await fetch('/api/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show success message with booking ID
+                    alert(`تم إرسال طلبك بنجاح!\nرقم الطلب: ${result.booking.bookingId}\n\nسنتصل بك في أقرب وقت ممكن.`);
+                    
+                    // Send WhatsApp notification
+                    if (result.whatsappSent) {
+                        console.log('تم إرسال إشعار واتساب بنجاح');
+                    }
+                    
+                    closeServiceModal();
+                    this.reset();
+                } else {
+                    throw new Error(result.error || 'حدث خطأ في إرسال الطلب');
+                }
+
+            } catch (error) {
+                console.error('خطأ في إرسال الطلب:', error);
+                alert('حدث خطأ في إرسال طلبك. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة.');
+            } finally {
                 // Reset button
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-            }, 2000);
+            }
         });
 
         // Close modal when clicking outside
