@@ -1,0 +1,59 @@
+{
+  "name": "riyadh-travel-website",
+  "version": "1.0.0",
+  "description": "موقع مكتب رياض القحطاني للسفريات والسياحة والأيدي العاملة - Complete modern website with backend API, MongoDB database, WhatsApp integration, and email notifications",
+  "main": "index.html",
+  "scripts": {
+    "setup": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "deploy": "npm run build && cd backend && npm run deploy",
+    "seed": "cd backend && node ../database/seed.js",
+    "start": "cd backend && npm start",
+    "vercel:deploy": "cd frontend && vercel --prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abdabdahfa2002/riyadh-travel-website.git"
+  },
+  "keywords": [
+    "travel",
+    "tourism",
+    "riyadh",
+    "saudi-arabia",
+    "website",
+    "booking",
+    "whatsapp",
+    "mongodb",
+    "express",
+    "nodejs"
+  ],
+  "author": {
+    "name": "MiniMax Agent",
+    "email": "minimax.agent@example.com"
+  },
+  "contributors": [
+    {
+      "name": "abdabdahfa2002",
+      "email": "abdabdahfa2002@users.noreply.github.com"
+    }
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "bugs": {
+    "url": "https://github.com/abdabdahfa2002/riyadh-travel-website/issues"
+  },
+  "homepage": "https://github.com/abdabdahfa2002/riyadh-travel-website#readme"
+}
