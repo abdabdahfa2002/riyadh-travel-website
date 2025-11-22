@@ -1,5 +1,4 @@
-// Updated: 2025-11-23 02:30:35 - Fix API endpoint deployment
-export default async function handler(req, res) {
+module.exports = (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,8 +10,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
+  const url = req.url;
+  const path = url.split('?')[0];
 
   // Health check endpoint
   if (path === '/api/health') {
@@ -27,13 +26,13 @@ export default async function handler(req, res) {
 
   // Services endpoint
   if (path === '/api/services' && req.method === 'GET') {
-    const servicesData = {
+    res.json({
       documentation: {
         title: "الخدمات الوثائقية",
         description: "إصدار وتجديد جميع أنواع الوثائق الرسمية",
         services: [
           "إصدار بطاقة إلكترونية",
-          "تجديد بطاقة إلكترونية", 
+          "تجديد بطاقة إلكترونية",
           "شهادة ميلاد",
           "بطاقة عائلية",
           "وكالة خارجية",
@@ -41,7 +40,7 @@ export default async function handler(req, res) {
         ]
       },
       travel: {
-        title: "خدمات السفريات", 
+        title: "خدمات السفريات",
         description: "حجز التذاكر وتنظيم الرحلات",
         services: [
           "حجز تذاكر طيران",
@@ -66,7 +65,7 @@ export default async function handler(req, res) {
       },
       government: {
         title: "مراجعة الدوائر الحكومية",
-        description: "تنفيذ المعاملات الحكومية", 
+        description: "تنفيذ جميع المعاملات الحكومية",
         services: [
           "السجل المدني",
           "مكتب الضرائب",
@@ -100,155 +99,59 @@ export default async function handler(req, res) {
           "خدمات التأمين"
         ]
       }
-    };
-    
-    res.json(servicesData);
+    });
     return;
   }
 
   // Booking endpoint
   if (path === '/api/booking' && req.method === 'POST') {
-    try {
-      const bookingData = req.body;
-      
-      // Validate required fields
-      if (!bookingData.customerInfo?.fullName || !bookingData.customerInfo?.phoneNumber || !bookingData.serviceDetails?.serviceType) {
-        res.status(400).json({
-          success: false,
-          error: 'بيانات ناقصة. يرجى تعبئة جميع الحقول المطلوبة'
-        });
-        return;
-      }
-
-      const bookingId = `BK-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
-      // Create booking object
-      const booking = {
-        bookingId: bookingId,
-        customerInfo: bookingData.customerInfo,
-        serviceDetails: bookingData.serviceDetails,
-        customRequirements: bookingData.customRequirements || '',
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        totalAmount: bookingData.paymentInfo?.totalAmount || 0,
-        paymentInfo: {
-          currency: 'SAR',
-          paymentMethod: 'pending',
-          totalAmount: bookingData.paymentInfo?.totalAmount || 0
-        }
-      };
-
-      console.log('✅ New booking created:', bookingId, bookingData.customerInfo.fullName);
-      
-      // Simulate WhatsApp notification
-      const whatsappMessage = `🎉 تم استلام طلب خدمتك بنجاح!
-
-📋 تفاصيل الطلب:
-رقم الطلب: ${bookingId}
-العميل: ${bookingData.customerInfo.fullName}
-الهاتف: ${bookingData.customerInfo.phoneNumber}
-المنطقة: ${bookingData.customerInfo.region || 'غير محدد'}
-نوع الخدمة: ${bookingData.serviceDetails.serviceType}
-الوصف: ${bookingData.serviceDetails.description || 'غير محدد'}
-
-💰 المبلغ: ${bookingData.paymentInfo?.totalAmount || 0} ريال
-
-⏰ سيتم التواصل معك قريباً على الرقم: ${bookingData.customerInfo.phoneNumber}
-
-شكراً لتواصلك معنا!`;
-
-      console.log('📱 WhatsApp message prepared:', whatsappMessage);
-      
-      // Send notification via email (simulated)
-      console.log('📧 Email notification prepared for:', process.env.BUSINESS_EMAIL);
-      
-      res.json({
-        success: true,
-        booking: booking,
-        whatsappSent: true,
-        message: 'تم حفظ طلبك بنجاح سيتم التواصل معك قريباً'
-      });
-      
-    } catch (error) {
-      console.error('❌ Booking error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في حفظ الطلب. يرجى المحاولة مرة أخرى'
-      });
+    const bookingData = req.body;
+    
+    if (!bookingData?.customerInfo?.fullName || !bookingData?.customerInfo?.phoneNumber) {
+      res.status(400).json({ success: false, error: 'بيانات العميل مطلوبة' });
+      return;
     }
+
+    const bookingId = `BK-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    
+    const booking = {
+      bookingId: bookingId,
+      customerInfo: bookingData.customerInfo,
+      serviceDetails: bookingData.serviceDetails,
+      customRequirements: bookingData.customRequirements || '',
+      totalAmount: bookingData.paymentInfo?.totalAmount || 0,
+      createdAt: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      message: 'تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً',
+      booking: booking,
+      whatsappSent: true
+    });
     return;
   }
 
   // Contact endpoint
   if (path === '/api/contact' && req.method === 'POST') {
-    try {
-      const contactData = req.body;
-      
-      console.log('📞 New contact message:', contactData);
-      
-      // Send confirmation
-      res.json({
-        success: true,
-        message: 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً'
-      });
-    } catch (error) {
-      console.error('❌ Contact error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى'
-      });
-    }
-    return;
-  }
-
-  // WhatsApp test endpoint
-  if (path === '/api/whatsapp/test' && req.method === 'GET') {
+    const contactData = req.body;
+    
     res.json({
       success: true,
-      phoneNumber: process.env.WHATSAPP_PHONE || '+967739208217',
-      message: 'WhatsApp service is configured correctly'
+      message: 'تم إرسال رسالتك بنجاح!',
+      contactId: `CT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
     });
     return;
   }
 
-  // WhatsApp send message endpoint
-  if (path === '/api/whatsapp/send' && req.method === 'POST') {
-    try {
-      const { message, phoneNumber } = req.body;
-      
-      const whatsappMessage = message || 'مرحباً، هذا اختبار لخدمة الواتساب';
-      const whatsappPhone = phoneNumber || process.env.WHATSAPP_PHONE || '+967739208217';
-      
-      console.log('📱 WhatsApp message to send:', whatsappMessage, 'to:', whatsappPhone);
-      
-      res.json({
-        success: true,
-        message: 'تم إرسال الرسالة بنجاح',
-        whatsappPhone: whatsappPhone,
-        whatsappMessage: whatsappMessage
-      });
-    } catch (error) {
-      console.error('❌ WhatsApp send error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في إرسال الرسالة'
-      });
-    }
-    return;
-  }
-
-  // Default response for not found routes
-  res.status(404).json({
-    error: 'Endpoint not found',
-    path: path,
-    method: req.method,
+  // Default response
+  res.json({
+    error: 'API endpoint not found',
     availableEndpoints: [
       '/api/health',
       '/api/services',
       '/api/booking',
-      '/api/contact',
-      '/api/whatsapp/test',
-      '/api/whatsapp/send'
+      '/api/contact'
     ]
   });
-}
+};
