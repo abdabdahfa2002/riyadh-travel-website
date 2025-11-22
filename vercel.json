@@ -1,1 +1,1 @@
-{"buildCommand": "echo 'Build completed successfully'", "outputDirectory": ".", "routes": [{"src": "/api/(.*)", "dest": "/api/index.js"}, {"src": "/(.*)", "dest": "/index.html"}], "version": 2}
+{"buildCommand": "echo 'Build completed successfully'", "outputDirectory": ".", "version": 2}
