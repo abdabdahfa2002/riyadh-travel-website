@@ -1,3 +1,4 @@
+// Updated: 2025-11-23 02:30:35 - Fix API endpoint deployment
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
