@@ -1,1 +1,1 @@
-{"functions": {"api/index.js": {"runtime": "nodejs18.x"}}, "routes": [{"src": "/api/(.*)", "dest": "/api/index.js"}], "installCommand": "npm install", "buildCommand": "echo 'Build completed successfully'"}
+{"functions": {"api/**/*.js": {"runtime": "nodejs18.x"}}, "routes": [{"src": "/api/(.*)", "dest": "/api/$1"}, {"src": "/(.*)", "dest": "/index.html"}], "version": 2}
